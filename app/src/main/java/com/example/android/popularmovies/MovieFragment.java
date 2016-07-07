@@ -12,13 +12,24 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.zip.Inflater;
 
 import javax.net.ssl.HttpsURLConnection;
 
 public class MovieFragment extends Fragment {
+
+    private final String LOG_TAG = MovieFragment.class.getSimpleName();
+
     public MovieFragment(){
     }
 
@@ -34,6 +45,7 @@ public class MovieFragment extends Fragment {
         super.onStart();
         FetchMovies fetchMovies = new FetchMovies();
         fetchMovies.execute();
+        Log.v( LOG_TAG, "in on start");
     }
 
     @Override
@@ -54,22 +66,26 @@ public class MovieFragment extends Fragment {
         return rootView;
     }
 
-    public class FetchMovies extends AsyncTask< Void, Void, Void >{
+    public class FetchMovies extends AsyncTask< Void, Void, String >{
 
         private final String LOG_TAG = FetchMovies.class.getSimpleName();
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected String doInBackground(Void... params) {
 
-            if( params.length == 0 ){
-                return null;
-            }
+            Log.v( LOG_TAG, "dude doInBackground");
+
+//            if( params.length == 0 ){
+//                return null;
+//            }
+
+            String JSONStr = null;
 
             HttpsURLConnection httpsURLConnection = null;
             BufferedReader reader = null;
 
             try{
-                final String BASE_URL = "http://api.themoviedb.org/3/movie/popular?";
+                final String BASE_URL = "https://api.themoviedb.org/3/movie/popular?";
                 final String APIID_PARAM = "api_key";
 
                 Uri builtUri = Uri.parse( BASE_URL).buildUpon()
@@ -77,12 +93,90 @@ public class MovieFragment extends Fragment {
                         .build();
                 Log.v( LOG_TAG, builtUri.toString());
 
-            } catch ( Exception e ){
+                URL url = new URL( builtUri.toString());
+
+                httpsURLConnection = (HttpsURLConnection) url.openConnection();
+                httpsURLConnection.setRequestMethod( "GET" );
+                httpsURLConnection.connect();
+
+                StringBuffer stringBuffer = new StringBuffer();
+
+                InputStream stream = httpsURLConnection.getInputStream();
+
+                if( stream == null ){
+                    return null;
+                }
+
+                reader = new BufferedReader ( new InputStreamReader( stream));
+
+                String line;
+                while( (line = reader.readLine() ) != null ){
+                    stringBuffer.append( line + "\n");
+                }
+
+                if( stringBuffer.length() == 0){
+                    return null;
+                }
+
+                JSONStr = stringBuffer.toString();
+                Log.v(LOG_TAG, JSONStr);
+
+            } catch ( IOException e ){
                 e.printStackTrace();
                 return null;
+            } finally {
+                if( httpsURLConnection != null ) {
+                    httpsURLConnection.disconnect();
+                }
+
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e(LOG_TAG, "Error closing stream", e);
+                    }
+                }
             }
 
-            return null;
+            return JSONStr;
+        }
+
+        @Override
+        protected void onPostExecute( String jsonString ) {
+
+            final String TMDB_RESULTS = "results";
+            final String TMDB_ORIGINAL_TITLE = "original_title";
+            final String TMDB_POSTER_PATH = "poster_path";
+            final String TMDB_RELEASE_DATE = "release_date";
+            final String TMDB_USER_RATING = "vote_average";
+            final String TMDB_OVERVIEW = "overview";
+
+            try {
+                myAdapter.clear();
+
+                JSONObject json = new JSONObject( jsonString );
+                JSONArray jsonArray = json.optJSONArray( TMDB_RESULTS );
+
+                String resultStr[] = new String[ jsonArray.length()];
+
+
+                for( int i = 0; i < jsonArray.length(); i++ ){
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+                    String originalTile = jsonObject.getString( TMDB_ORIGINAL_TITLE);
+                    String posterPath = jsonObject.getString( TMDB_POSTER_PATH);
+                    String releaseDate = jsonObject.getString( TMDB_RELEASE_DATE);
+                    String userRating = jsonObject.getString( TMDB_USER_RATING);
+                    String overView = jsonObject.getString( TMDB_OVERVIEW);
+
+                    resultStr[i] = originalTile + posterPath + releaseDate + userRating + overView;
+
+                    myAdapter.add( resultStr[i] );
+                }
+            } catch ( JSONException j ){
+                j.printStackTrace();
+            }
+
         }
     }
 }
