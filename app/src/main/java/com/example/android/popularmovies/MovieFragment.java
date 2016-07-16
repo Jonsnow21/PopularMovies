@@ -205,7 +205,7 @@ public class MovieFragment extends Fragment {
             final String TMDB_OVERVIEW = "overview";
 
             try {
-                JSONObject json = new JSONObject( jsonString );
+                    JSONObject json = new JSONObject( jsonString );
                 JSONArray jsonArray = json.optJSONArray( TMDB_RESULTS );
 
                 myAdapter.clear();
