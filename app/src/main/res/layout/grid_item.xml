@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ImageVie xmlns:android="http://schemas.android.com/apk/res/android"
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/movie_poster"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:minHeight="?android:attr/gridViewStyle"
-    android:minWidth="?android:attr/gridViewStyle">
-
-</ImageVie>
+    android:layout_width="164dp"
+    android:layout_height="164dp"
+    android:focusableInTouchMode="false"
+    android:clickable="false"
+    android:focusable="false"
+    android:background="?attr/selectableItemBackgroundBorderless"
+    android:scaleType="centerCrop">
+</ImageView>
