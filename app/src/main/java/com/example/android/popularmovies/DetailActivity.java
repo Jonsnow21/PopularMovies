@@ -12,7 +12,7 @@ import com.squareup.picasso.Picasso;
 
 public class DetailActivity extends Activity {
 
-    ImageView thumbnail;
+    ImageView thumbnail, backdropImage;
     TextView movieTitle, releaseDate, movieDescription;
     RatingBar movieRating;
 
@@ -29,11 +29,13 @@ public class DetailActivity extends Activity {
         releaseDate = (TextView) findViewById(R.id.movie_release_date);
         movieDescription = (TextView) findViewById(R.id.movie_description);
         movieRating = (RatingBar) findViewById(R.id.movie_rating);
+        backdropImage = (ImageView) findViewById(R.id.movie_backdrop_image);
 
         movieTitle.setText( movie.getTitle());
         releaseDate.setText( movie.getReleaseDate());
         movieDescription.setText( movie.getOverView());
         movieRating.setRating( movie.getUserRating());
         Picasso.with( this ).load( movie.getPosterPath()).into(thumbnail);
+        Picasso.with(this).load(movie.getBackdropPath()).into(backdropImage);
     }
 }

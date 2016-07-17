@@ -2,13 +2,13 @@ package com.example.android.popularmovies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.os.AsyncTaskCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,7 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.Toast;
 
@@ -31,8 +30,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.zip.Inflater;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -50,7 +47,15 @@ public class MovieFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState){
         super.onCreate( savedInstanceState);
 
+        sortOrder = "/popular?";
+        updateMovies( sortOrder );
+
         setHasOptionsMenu( true );
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
     }
 
     @Override
@@ -76,8 +81,6 @@ public class MovieFragment extends Fragment {
     @Override
     public void onStart(){
         super.onStart();
-        sortOrder = "/popular?";
-        updateMovies( sortOrder );
     }
 
     public void updateMovies( String order){
@@ -203,6 +206,9 @@ public class MovieFragment extends Fragment {
             final String TMDB_RELEASE_DATE = "release_date";
             final String TMDB_USER_RATING = "vote_average";
             final String TMDB_OVERVIEW = "overview";
+            final String TMDB_BACKDROP_PATH = "backdrop_path";
+
+            Log.v(LOG_TAG, jsonString);
 
             try {
                     JSONObject json = new JSONObject( jsonString );
@@ -221,8 +227,9 @@ public class MovieFragment extends Fragment {
                     String releaseDate = jsonObject.getString( TMDB_RELEASE_DATE);
                     float userRating = Float.parseFloat(jsonObject.getString( TMDB_USER_RATING));
                     String overView = jsonObject.getString( TMDB_OVERVIEW);
+                    String backdropPath = jsonObject.getString(TMDB_BACKDROP_PATH);
 
-                    moviesArray[i] = new Movie( originalTitle, posterPath, releaseDate, userRating, overView );
+                    moviesArray[i] = new Movie( originalTitle, posterPath, releaseDate, userRating, overView, backdropPath );
 
                     myAdapter.add(moviesArray[i]);
                 }

@@ -10,24 +10,31 @@ public class Movie implements Parcelable {
     private String releaseDate;
     private float userRating;
     private String overView;
+    private String backdropPath;
 
     Movie( String title,
            String posterPath,
            String releaseDate,
            float userRating,
-           String overView){
+           String overView,
+           String backdropPath){
 
         this.title = title;
         this.posterPath = posterPath ;
         this.releaseDate = releaseDate;
         this.userRating = userRating;
         this.overView = overView;
-
+        this.backdropPath = backdropPath;
     }
 
     public String  getPosterPath(){
-        final String BASE_URL = "http://image.tmdb.org/t/p/w185/";
+        final String BASE_URL = "http://image.tmdb.org/t/p/w342/";
         return BASE_URL + posterPath;
+    }
+
+    public String getBackdropPath() {
+        final String BASE_URL = "http://image.tmdb.org/t/p/w500/";
+        return BASE_URL + backdropPath;
     }
 
     public String getTitle(){
@@ -52,6 +59,7 @@ public class Movie implements Parcelable {
         releaseDate = in.readString();
         userRating = in.readFloat();
         overView = in.readString();
+        backdropPath = in.readString();
     }
 
     @Override
@@ -66,6 +74,7 @@ public class Movie implements Parcelable {
         dest.writeString(releaseDate);
         dest.writeFloat(userRating);
         dest.writeString(overView);
+        dest.writeString(backdropPath);
     }
 
     @SuppressWarnings("unused")

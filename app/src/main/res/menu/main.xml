@@ -2,6 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <item android:id="@+id/settings" android:title="@string/action_setting"
+        app:showAsAction="always"/>
+
     <item android:id="@+id/sort_by_most_popular"
         android:title="@string/sort_by_most_popular"
         app:showAsAction="never"/>
