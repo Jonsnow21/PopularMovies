@@ -2,12 +2,14 @@ package com.example.android.popularmovies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,7 +38,6 @@ import javax.net.ssl.HttpsURLConnection;
 public class MovieFragment extends Fragment {
 
     private final String LOG_TAG = MovieFragment.class.getSimpleName();
-    private String sortOrder;
 
     public MovieFragment(){
     }
@@ -47,8 +48,8 @@ public class MovieFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState){
         super.onCreate( savedInstanceState);
 
-        sortOrder = "/popular?";
-        updateMovies( sortOrder );
+        //sortOrder = "/popular?";
+        //sortOrder = "/top_rated?":
 
         setHasOptionsMenu( true );
     }
@@ -66,13 +67,9 @@ public class MovieFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if( id == R.id.sort_by_most_popular ){
-            sortOrder = "/popular?";
-            updateMovies( sortOrder);
-            return true;
-        } else if( id == R.id.sort_by_top_rated ){
-            sortOrder = "/top_rated?";
-            updateMovies(sortOrder);
+        if( id == R.id.settings){
+            Intent intent = new Intent( getActivity(), SettingsActivity.class );
+            startActivity(intent);
             return true;
         }
         return super.onOptionsItemSelected( item );
@@ -81,12 +78,16 @@ public class MovieFragment extends Fragment {
     @Override
     public void onStart(){
         super.onStart();
+        updateMovies();
     }
 
-    public void updateMovies( String order){
+    public void updateMovies(){
+        String sortOrder;
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        sortOrder = preferences.getString( getString(R.string.sort_order), getString(R.string.pref_sort_most_popular));
         if( isOnline() ) {
             FetchMovies fetchMovies = new FetchMovies();
-            fetchMovies.execute( order );
+            fetchMovies.execute( sortOrder );
             Log.v(LOG_TAG, "in on start");
         } else {
             Toast.makeText(getContext(),"Please turn on an active internet connection",Toast.LENGTH_SHORT).show();
@@ -141,7 +142,7 @@ public class MovieFragment extends Fragment {
             BufferedReader reader = null;
 
             try{
-                final String BASE_URL = "https://api.themoviedb.org/3/movie" + params[0];
+                final String BASE_URL = "https://api.themoviedb.org/3/movie/" + params[0];
                 final String APIID_PARAM = "api_key";
 
                 Uri builtUri = Uri.parse( BASE_URL).buildUpon()

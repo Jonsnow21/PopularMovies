@@ -25,7 +25,6 @@
             android:textStyle="bold"
             android:background="@android:color/holo_red_dark"
             android:textColor="@android:color/white"
-            android:text="BatMan Vs SuperMan"
             android:layout_below="@id/movie_backdrop_image"/>
 
         <ImageView

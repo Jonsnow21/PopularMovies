@@ -11,6 +11,6 @@
     <string name="sort_order">sortOrder</string>
     <string name="sort_by">Sort By</string>
 
-    <string name="pref_sort_most_popular">mostPopular</string>
-    <string name="pref_sort_top_rated">topRated</string>
+    <string name="pref_sort_most_popular">popular?</string>
+    <string name="pref_sort_top_rated">top_rated?</string>
 </resources>
