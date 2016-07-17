@@ -35,7 +35,17 @@ public class DetailActivity extends Activity {
         releaseDate.setText( movie.getReleaseDate());
         movieDescription.setText( movie.getOverView());
         movieRating.setRating( movie.getUserRating());
-        Picasso.with( this ).load( movie.getPosterPath()).into(thumbnail);
-        Picasso.with(this).load(movie.getBackdropPath()).into(backdropImage);
+
+        Picasso.with( this )
+                .load( movie.getPosterPath())
+                .placeholder(R.drawable.placeholder)
+                .error(R.drawable.placeholder_error)
+                .into(thumbnail);
+
+        Picasso.with(this)
+                .load(movie.getBackdropPath())
+                .placeholder(R.drawable.placeholder)
+                .error(R.drawable.placeholder_error)
+                .into(backdropImage);
     }
 }

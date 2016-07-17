@@ -37,19 +37,11 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class MovieFragment extends Fragment {
 
-    private final String LOG_TAG = MovieFragment.class.getSimpleName();
-
-    public MovieFragment(){
-    }
-
     private MovieAdapter myAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate( savedInstanceState);
-
-        //sortOrder = "/popular?";
-        //sortOrder = "/top_rated?":
 
         setHasOptionsMenu( true );
     }
@@ -88,7 +80,6 @@ public class MovieFragment extends Fragment {
         if( isOnline() ) {
             FetchMovies fetchMovies = new FetchMovies();
             fetchMovies.execute( sortOrder );
-            Log.v(LOG_TAG, "in on start");
         } else {
             Toast.makeText(getContext(),"Please turn on an active internet connection",Toast.LENGTH_SHORT).show();
         }
@@ -109,7 +100,6 @@ public class MovieFragment extends Fragment {
         );
 
         View rootView = inflater.inflate( R.layout.fragment_main, container, false);
-
         GridView gridView = (GridView) rootView.findViewById(R.id.grid_for_posters);
         gridView.setAdapter( myAdapter );
 
@@ -117,8 +107,6 @@ public class MovieFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Movie movie = myAdapter.getItem( position);
-                //Toast.makeText( getContext(), "Movie " + movie.getTitle() + " Selected", Toast.LENGTH_SHORT ).show();
-
                 Intent intent = new Intent( getActivity(), DetailActivity.class).putExtra(Intent.EXTRA_TEXT, movie);
                 startActivity(intent);
             }
@@ -127,79 +115,11 @@ public class MovieFragment extends Fragment {
         return rootView;
     }
 
-    public class FetchMovies extends AsyncTask< String, Void, String >{
+    public class FetchMovies extends AsyncTask< String, Void, Movie[] >{
 
         private final String LOG_TAG = FetchMovies.class.getSimpleName();
 
-        @Override
-        protected String doInBackground(String... params) {
-
-            Log.v( LOG_TAG, "dude doInBackground");
-
-            String JSONStr = null;
-
-            HttpsURLConnection httpsURLConnection = null;
-            BufferedReader reader = null;
-
-            try{
-                final String BASE_URL = "https://api.themoviedb.org/3/movie/" + params[0];
-                final String APIID_PARAM = "api_key";
-
-                Uri builtUri = Uri.parse( BASE_URL).buildUpon()
-                        .appendQueryParameter( APIID_PARAM, BuildConfig.TMDB_API_KEY)
-                        .build();
-                Log.v( LOG_TAG, builtUri.toString());
-
-                URL url = new URL( builtUri.toString());
-
-                httpsURLConnection = (HttpsURLConnection) url.openConnection();
-                httpsURLConnection.setRequestMethod( "GET" );
-                httpsURLConnection.connect();
-
-                StringBuffer stringBuffer = new StringBuffer();
-
-                InputStream stream = httpsURLConnection.getInputStream();
-
-                if( stream == null ){
-                    return null;
-                }
-
-                reader = new BufferedReader ( new InputStreamReader( stream));
-
-                String line;
-                while( (line = reader.readLine() ) != null ){
-                    stringBuffer.append( line + "\n");
-                }
-
-                if( stringBuffer.length() == 0){
-                    return null;
-                }
-
-                JSONStr = stringBuffer.toString();
-                Log.v(LOG_TAG, JSONStr);
-
-            } catch ( IOException e ){
-                e.printStackTrace();
-                return null;
-            } finally {
-                if( httpsURLConnection != null ) {
-                    httpsURLConnection.disconnect();
-                }
-
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e(LOG_TAG, "Error closing stream", e);
-                    }
-                }
-            }
-
-            return JSONStr;
-        }
-
-        @Override
-        protected void onPostExecute( String jsonString ) {
+        private Movie[] createObject(String jsonString ){
 
             final String TMDB_RESULTS = "results";
             final String TMDB_ORIGINAL_TITLE = "original_title";
@@ -209,16 +129,10 @@ public class MovieFragment extends Fragment {
             final String TMDB_OVERVIEW = "overview";
             final String TMDB_BACKDROP_PATH = "backdrop_path";
 
-            Log.v(LOG_TAG, jsonString);
-
             try {
-                    JSONObject json = new JSONObject( jsonString );
+                JSONObject json = new JSONObject( jsonString );
                 JSONArray jsonArray = json.optJSONArray( TMDB_RESULTS );
-
-                myAdapter.clear();
-
                 Movie moviesArray[] = new Movie[jsonArray.length()];
-
 
                 for( int i = 0; i < jsonArray.length(); i++ ){
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -231,13 +145,87 @@ public class MovieFragment extends Fragment {
                     String backdropPath = jsonObject.getString(TMDB_BACKDROP_PATH);
 
                     moviesArray[i] = new Movie( originalTitle, posterPath, releaseDate, userRating, overView, backdropPath );
-
-                    myAdapter.add(moviesArray[i]);
                 }
+                return moviesArray;
             } catch ( JSONException j ){
                 j.printStackTrace();
             }
+            return null;
+        }
 
+        @Override
+        protected Movie[] doInBackground(String... params) {
+
+            String JSONStr = null;
+            HttpsURLConnection httpsURLConnection = null;
+            BufferedReader reader = null;
+
+            try {
+                final String BASE_URL = "https://api.themoviedb.org/3/movie/" + params[0];
+                final String APIID_PARAM = "api_key";
+
+                Uri builtUri = Uri.parse(BASE_URL).buildUpon()
+                        .appendQueryParameter(APIID_PARAM, BuildConfig.TMDB_API_KEY)
+                        .build();
+
+                URL url = new URL(builtUri.toString());
+
+                httpsURLConnection = (HttpsURLConnection) url.openConnection();
+                httpsURLConnection.setRequestMethod("GET");
+                httpsURLConnection.connect();
+
+                StringBuffer stringBuffer = new StringBuffer();
+                InputStream stream = httpsURLConnection.getInputStream();
+
+                if (stream == null) {
+                    return null;
+                }
+
+                reader = new BufferedReader(new InputStreamReader(stream));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    stringBuffer.append(line + "\n");
+                }
+
+                if (stringBuffer.length() == 0) {
+                    return null;
+                }
+
+                JSONStr = stringBuffer.toString();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            } finally {
+                if (httpsURLConnection != null) {
+                    httpsURLConnection.disconnect();
+                }
+
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e(LOG_TAG, "Error closing stream", e);
+                    }
+                }
+            }
+
+            try {
+                return createObject(JSONStr);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Movie[] movies) {
+            if( movies != null ) {
+                myAdapter.clear();
+                for (Movie movie: movies) {
+                    myAdapter.add(movie);
+                }
+            }
         }
     }
 }

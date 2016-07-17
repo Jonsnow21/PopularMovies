@@ -28,7 +28,6 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
         Movie movie = getItem(position);
         ViewHolder viewHolder;
         String url = movie.getPosterPath();
-        Log.v( "URL", url );
 
         if( convertView == null ) {
             viewHolder = new ViewHolder();
@@ -39,7 +38,13 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        Picasso.with( getContext()).load(url).into(viewHolder.imageView);
+
+        Picasso.with( getContext())
+                .load(url)
+                .placeholder(R.drawable.placeholder)
+                .error(R.drawable.placeholder_error)
+                .into(viewHolder.imageView);
+
         return convertView;
     }
 }
