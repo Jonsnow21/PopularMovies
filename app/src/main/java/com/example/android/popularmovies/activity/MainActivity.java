@@ -1,7 +1,10 @@
-package com.example.android.popularmovies;
+package com.example.android.popularmovies.activity;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import com.example.android.popularmovies.MovieFragment;
+import com.example.android.popularmovies.R;
 
 public class MainActivity extends AppCompatActivity {
 

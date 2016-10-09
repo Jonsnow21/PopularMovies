@@ -1,4 +1,4 @@
-package com.example.android.popularmovies;
+package com.example.android.popularmovies.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -8,6 +8,8 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.example.android.popularmovies.R;
+import com.example.android.popularmovies.model.Movie;
 import com.squareup.picasso.Picasso;
 
 public class DetailActivity extends Activity {
@@ -33,8 +35,8 @@ public class DetailActivity extends Activity {
 
         movieTitle.setText( movie.getTitle());
         releaseDate.setText( movie.getReleaseDate());
-        movieDescription.setText( movie.getOverView());
-        movieRating.setRating( movie.getUserRating());
+        movieDescription.setText( movie.getOverview());
+        movieRating.setRating(  movie.getPopularity());
 
         Picasso.with( this )
                 .load( movie.getPosterPath())
