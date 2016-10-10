@@ -118,11 +118,11 @@ public class MovieFragment extends Fragment {
 
             ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
             Call<MovieCallResult> call = apiService.getMovies(url);
-            //Log.v("URL", call.request().url().toString());
+            Log.v("URL", call.request().url().toString());
             call.enqueue(new Callback<MovieCallResult>() {
                 @Override
                 public void onResponse(Call<MovieCallResult> call, Response<MovieCallResult> response) {
-                    //Log.v("data", response.body().toString());
+                    Log.v("data", response.body().toString());
                     ArrayList<Movie> movies = response.body().getMovies();
                     //Log.v(TAG, movies.size() + "");
                     myAdapter = new MovieAdapter(

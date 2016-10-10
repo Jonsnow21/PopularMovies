@@ -3,7 +3,6 @@ package com.example.android.popularmovies.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +25,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         this.movieList = movieList;
         this.context = mContext;
         this.layout = layout;
-        Log.v("MovieList", movieList.size() + "");
+//        Log.v("MovieList", movieList.size() + "");
     }
 
     public static class MovieViewHolder extends RecyclerView.ViewHolder {

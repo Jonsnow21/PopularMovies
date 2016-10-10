@@ -38,8 +38,7 @@ public class DetailActivity extends Activity {
         movieTitle.setText(movie.getTitle());
         releaseDate.setText(movie.getReleaseDate());
         movieDescription.setText(movie.getOverview());
-        //movieRating.setRating(movie.getVoteAverage());
-        //Log.v(LOG_TAG, movie.getVoteAverage().toString());
+        movieRating.setRating(movie.getVoteAverage());
 
         Picasso.with( this )
                 .load( movie.getPosterPath())

@@ -11,6 +11,15 @@ import java.util.List;
 
 public class Movie implements Parcelable {
 
+    public Movie(String posterPath, String overview, String releaseDate, String title, String backdropPath, float voteAverage) {
+        this.posterPath = posterPath;
+        this.overview = overview;
+        this.releaseDate = releaseDate;
+        this.title = title;
+        this.backdropPath = backdropPath;
+        this.voteAverage = voteAverage;
+    }
+
     @SerializedName("poster_path")
     @Expose
     private String posterPath;
@@ -20,16 +29,6 @@ public class Movie implements Parcelable {
     @SerializedName("overview")
     @Expose
     private String overview;
-
-    public Movie(String posterPath, String overview, String releaseDate, String title, String backdropPath, Float popularity) {
-        this.posterPath = posterPath;
-        this.overview = overview;
-        this.releaseDate = releaseDate;
-        this.title = title;
-        this.backdropPath = backdropPath;
-        this.popularity = popularity;
-    }
-
     @SerializedName("release_date")
     @Expose
     private String releaseDate;
@@ -62,7 +61,7 @@ public class Movie implements Parcelable {
     private Boolean video;
     @SerializedName("vote_average")
     @Expose
-    private Double voteAverage;
+    private float voteAverage;
 
     /**
      *
@@ -305,7 +304,7 @@ public class Movie implements Parcelable {
      * @return
      *     The voteAverage
      */
-    public Double getVoteAverage() {
+    public float getVoteAverage() {
         return voteAverage;
     }
 
@@ -314,7 +313,7 @@ public class Movie implements Parcelable {
      * @param voteAverage
      *     The vote_average
      */
-    public void setVoteAverage(Double voteAverage) {
+    public void setVoteAverage(float voteAverage) {
         this.voteAverage = voteAverage;
     }
 
@@ -340,7 +339,7 @@ public class Movie implements Parcelable {
         voteCount = in.readByte() == 0x00 ? null : in.readInt();
         byte videoVal = in.readByte();
         video = videoVal == 0x02 ? null : videoVal != 0x00;
-        voteAverage = in.readByte() == 0x00 ? null : in.readDouble();
+        voteAverage = in.readFloat();
     }
 
     @Override
@@ -378,7 +377,7 @@ public class Movie implements Parcelable {
             dest.writeByte((byte) (0x00));
         } else {
             dest.writeByte((byte) (0x01));
-            dest.writeDouble(popularity);
+            dest.writeFloat(popularity);
         }
         if (voteCount == null) {
             dest.writeByte((byte) (0x00));
@@ -391,12 +390,7 @@ public class Movie implements Parcelable {
         } else {
             dest.writeByte((byte) (video ? 0x01 : 0x00));
         }
-        if (voteAverage == null) {
-            dest.writeByte((byte) (0x00));
-        } else {
-            dest.writeByte((byte) (0x01));
-            dest.writeDouble(voteAverage);
-        }
+        dest.writeFloat(voteAverage);
     }
 
     @SuppressWarnings("unused")
