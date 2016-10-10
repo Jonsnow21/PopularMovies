@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -17,6 +18,7 @@ public class DetailActivity extends Activity {
     ImageView thumbnail, backdropImage;
     TextView movieTitle, releaseDate, movieDescription;
     RatingBar movieRating;
+    private final String LOG_TAG = DetailActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,10 +35,11 @@ public class DetailActivity extends Activity {
         movieRating = (RatingBar) findViewById(R.id.movie_rating);
         backdropImage = (ImageView) findViewById(R.id.movie_backdrop_image);
 
-        movieTitle.setText( movie.getTitle());
-        releaseDate.setText( movie.getReleaseDate());
-        movieDescription.setText( movie.getOverview());
-        movieRating.setRating(  movie.getPopularity());
+        movieTitle.setText(movie.getTitle());
+        releaseDate.setText(movie.getReleaseDate());
+        movieDescription.setText(movie.getOverview());
+        //movieRating.setRating(movie.getVoteAverage());
+        //Log.v(LOG_TAG, movie.getVoteAverage().toString());
 
         Picasso.with( this )
                 .load( movie.getPosterPath())

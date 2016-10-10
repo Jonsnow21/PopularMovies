@@ -41,11 +41,13 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.content.ContentValues.TAG;
+import static com.example.android.popularmovies.R.id.recyclerView;
 
 public class MovieFragment extends Fragment {
 
     private MovieAdapter myAdapter;
     private final static String API_KEY = BuildConfig.TMDB_API_KEY;
+    RecyclerView recyclerView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -78,6 +80,8 @@ public class MovieFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        Log.v("InOnStart", "call");
+        getMovies();
     }
 
     public boolean isOnline() {
@@ -90,11 +94,15 @@ public class MovieFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        final RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
         recyclerView.addItemDecoration(new GridSpacingItemDecoration(dpToPx(0)));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+        getMovies();
+        return rootView;
+    }
 
+    public void getMovies() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String sortOrder = preferences.getString(getString(R.string.sort_order), getString(R.string.pref_sort_most_popular));
         Log.v("sort", sortOrder);
@@ -136,7 +144,6 @@ public class MovieFragment extends Fragment {
             Toast.makeText(getContext(), "Please turn on an active internet connection", Toast.LENGTH_SHORT).show();
         }
 
-        return rootView;
     }
 
     public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
