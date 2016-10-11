@@ -1,12 +1,14 @@
 package com.example.android.popularmovies.activity;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
-import com.example.android.popularmovies.fragment.MovieFragment;
 import com.example.android.popularmovies.R;
+import com.example.android.popularmovies.fragment.MovieFragment;
 
 public class MainActivity extends AppCompatActivity {
+
+    private final static String MF = "movie_fragment";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -14,8 +16,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         if( savedInstanceState == null ){
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new MovieFragment() )
+                    .add(R.id.container, new MovieFragment())
+                    .addToBackStack(MF)
                     .commit();
         }
+        getSupportActionBar().setElevation(0f);
     }
 }
