@@ -13,12 +13,23 @@
         android:layout_height="match_parent"
         android:background="@android:color/white">
 
+        <TextView
+            android:id="@+id/movie_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:padding="16dp"
+            android:background="@color/colorPrimary"
+            android:textColor="@android:color/white"
+            />
+
         <ImageView
             android:id="@+id/movie_thumbnail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="8dp"
-            android:paddingTop="8dp"/>
+            android:paddingTop="8dp"
+            android:layout_below="@id/movie_title"/>
 
         <LinearLayout
             android:id="@+id/layout_movie_metadata"
@@ -26,6 +37,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_toRightOf="@id/movie_thumbnail"
+            android:layout_below="@id/movie_title"
             android:padding="16dp">
 
             <TextView
@@ -42,7 +54,7 @@
                 android:id="@+id/movie_release_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/holo_blue_dark"
+                android:textColor="@android:color/black"
                 android:textSize="20sp"
                 android:textStyle="italic"
                 android:paddingBottom="8dp"
@@ -59,8 +71,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/rating"
-                android:textColor="@android:color/black"
                 android:textSize="20sp"
+                android:textStyle="bold"
                 android:paddingBottom="8dp"
                 android:layout_gravity="center" />
 
@@ -84,9 +96,55 @@
             android:id="@+id/movie_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
             android:padding="8dp"
             android:layout_below="@id/movie_thumbnail" />
+
+        <ImageView
+            android:id="@+id/line_below_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/horizontal_line_dark"
+            android:padding="8dp"
+            android:layout_below="@id/movie_description"/>
+
+        <TextView
+            android:id="@+id/text_trailers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/trailers"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:padding="8dp"
+            android:layout_below="@id/line_below_description"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/recyclerView_trailer"
+            android:layout_below="@id/text_trailers"
+            xmlns:android="http://schemas.android.com/apk/res/android">
+        </android.support.v7.widget.RecyclerView>
+
+        <ImageView
+            android:id="@+id/line_below_recyclerView_trailer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/horizontal_line_dark"
+            android:padding="8dp"
+            android:layout_below="@id/recyclerView_trailer"/>
+
+        <TextView
+            android:id="@+id/movie_review"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/reviews"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:padding="8dp"
+            android:layout_below="@id/line_below_recyclerView_trailer"
+            />
 
     </RelativeLayout>
 

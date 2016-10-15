@@ -11,15 +11,6 @@ import java.util.List;
 
 public class Movie implements Parcelable {
 
-    public Movie(String posterPath, String overview, String releaseDate, String title, String backdropPath, float voteAverage) {
-        this.posterPath = posterPath;
-        this.overview = overview;
-        this.releaseDate = releaseDate;
-        this.title = title;
-        this.backdropPath = backdropPath;
-        this.voteAverage = voteAverage;
-    }
-
     @SerializedName("poster_path")
     @Expose
     private String posterPath;

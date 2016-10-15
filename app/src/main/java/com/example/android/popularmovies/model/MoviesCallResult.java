@@ -8,7 +8,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 
-public class MovieCallResult implements Parcelable {
+public class MoviesCallResult implements Parcelable {
 
     @SerializedName("page")
     @Expose
@@ -96,7 +96,7 @@ public class MovieCallResult implements Parcelable {
     }
 
 
-    protected MovieCallResult(Parcel in) {
+    protected MoviesCallResult(Parcel in) {
         page = in.readByte() == 0x00 ? null : in.readInt();
         if (in.readByte() == 0x01) {
             movies = new ArrayList<Movie>();
@@ -142,15 +142,15 @@ public class MovieCallResult implements Parcelable {
     }
 
     @SuppressWarnings("unused")
-    public static final Parcelable.Creator<MovieCallResult> CREATOR = new Parcelable.Creator<MovieCallResult>() {
+    public static final Parcelable.Creator<MoviesCallResult> CREATOR = new Parcelable.Creator<MoviesCallResult>() {
         @Override
-        public MovieCallResult createFromParcel(Parcel in) {
-            return new MovieCallResult(in);
+        public MoviesCallResult createFromParcel(Parcel in) {
+            return new MoviesCallResult(in);
         }
 
         @Override
-        public MovieCallResult[] newArray(int size) {
-            return new MovieCallResult[size];
+        public MoviesCallResult[] newArray(int size) {
+            return new MoviesCallResult[size];
         }
     };
 }

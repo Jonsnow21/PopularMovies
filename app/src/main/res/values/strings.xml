@@ -13,4 +13,7 @@
 
     <string name="pref_sort_most_popular">popular?</string>
     <string name="pref_sort_top_rated">top_rated?</string>
+
+    <string name="trailers">Trailers:</string>
+    <string name="reviews">Reviews:</string>
 </resources>

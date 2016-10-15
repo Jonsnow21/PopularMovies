@@ -1,11 +1,9 @@
 package com.example.android.popularmovies.fragment;
 
-import android.content.Context;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -27,9 +25,10 @@ import com.example.android.popularmovies.R;
 import com.example.android.popularmovies.activity.SettingsActivity;
 import com.example.android.popularmovies.adapter.MovieAdapter;
 import com.example.android.popularmovies.model.Movie;
-import com.example.android.popularmovies.model.MovieCallResult;
+import com.example.android.popularmovies.model.MoviesCallResult;
 import com.example.android.popularmovies.rest.ApiClient;
 import com.example.android.popularmovies.rest.ApiInterface;
+import com.example.android.popularmovies.utils.NetworkUtils;
 
 import java.util.ArrayList;
 
@@ -38,14 +37,16 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.content.ContentValues.TAG;
+import static com.example.android.popularmovies.utils.Constants.APIID_PARAM;
+import static com.example.android.popularmovies.utils.Constants.API_KEY;
 
 public class MovieFragment extends Fragment {
 
     private MovieAdapter myAdapter;
-    private final static String API_KEY = BuildConfig.TMDB_API_KEY;
-    RecyclerView recyclerView;
+    private RecyclerView recyclerView;
     private String mSortOrder;
-    SharedPreferences preferences;
+    private SharedPreferences preferences;
+    private NetworkUtils networkUtils;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -65,14 +66,16 @@ public class MovieFragment extends Fragment {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.settings) {
-            Intent intent = new Intent(getActivity(), SettingsActivity.class);
-            startActivity(intent);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        networkUtils = new NetworkUtils();
+        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        mSortOrder = preferences.getString(getString(R.string.sort_order), getString(R.string.pref_sort_most_popular));
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        getMovies(mSortOrder);
+        return rootView;
     }
 
     @Override
@@ -85,38 +88,30 @@ public class MovieFragment extends Fragment {
         }
     }
 
-    public boolean isOnline() {
-        ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo info = cm.getActiveNetworkInfo();
-        return info != null && info.isConnectedOrConnecting();
-    }
-
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        mSortOrder = preferences.getString(getString(R.string.sort_order), getString(R.string.pref_sort_most_popular));
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        getMovies(mSortOrder);
-        return rootView;
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.settings) {
+            Intent intent = new Intent(getActivity(), SettingsActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void getMovies(String sortOrder) {
-        if (isOnline()) {
-            final String APIID_PARAM = "api_key";
+        if (networkUtils.isOnline(getActivity())) {
             Uri builtUri = Uri.parse(sortOrder).buildUpon()
                     .appendQueryParameter(APIID_PARAM, API_KEY)
                     .build();
             String url = builtUri.toString();
 
             ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
-            Call<MovieCallResult> call = apiService.getMovies(url);
+            Call<MoviesCallResult> call = apiService.getMovies(url);
             Log.v("URL", call.request().url().toString());
-            call.enqueue(new Callback<MovieCallResult>() {
+            call.enqueue(new Callback<MoviesCallResult>() {
                 @Override
-                public void onResponse(Call<MovieCallResult> call, Response<MovieCallResult> response) {
+                public void onResponse(Call<MoviesCallResult> call, Response<MoviesCallResult> response) {
                     Log.v("data", response.body().toString());
                     ArrayList<Movie> movies = response.body().getMovies();
                     myAdapter = new MovieAdapter(
@@ -128,7 +123,7 @@ public class MovieFragment extends Fragment {
                 }
 
                 @Override
-                public void onFailure(Call<MovieCallResult> call, Throwable t) {
+                public void onFailure(Call<MoviesCallResult> call, Throwable t) {
                     Log.e(TAG, t.toString());
                     Log.v("onFailure", "problem");
                 }
