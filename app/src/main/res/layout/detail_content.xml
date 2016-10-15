@@ -119,13 +119,33 @@
             android:padding="8dp"
             android:layout_below="@id/line_below_description"/>
 
-        <android.support.v7.widget.RecyclerView
+        <LinearLayout
+            android:id="@+id/recyclerView_trailer_parent"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/recyclerView_trailer"
-            android:layout_below="@id/text_trailers"
-            xmlns:android="http://schemas.android.com/apk/res/android">
-        </android.support.v7.widget.RecyclerView>
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_below="@id/text_trailers">
+
+            <android.support.v7.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/recyclerView_trailer"
+                xmlns:android="http://schemas.android.com/apk/res/android">
+            </android.support.v7.widget.RecyclerView>
+
+            <TextView
+                android:id="@+id/no_trailers"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/no_trailers"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="20sp"
+                android:visibility="gone"
+                android:gravity="center"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingBottom="4dp" />
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/line_below_recyclerView_trailer"
@@ -133,7 +153,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/horizontal_line_dark"
             android:padding="8dp"
-            android:layout_below="@id/recyclerView_trailer"/>
+            android:layout_below="@id/recyclerView_trailer_parent"/>
 
         <TextView
             android:id="@+id/movie_review"
@@ -145,6 +165,28 @@
             android:padding="8dp"
             android:layout_below="@id/line_below_recyclerView_trailer"
             />
+
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/recyclerView_reviews"
+            android:layout_below="@id/movie_review"
+            xmlns:android="http://schemas.android.com/apk/res/android">
+        </android.support.v7.widget.RecyclerView>
+
+        <TextView
+            android:id="@+id/no_reviews"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_reviews"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="20sp"
+            android:visibility="gone"
+            android:gravity="center"
+            android:paddingBottom="8dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:layout_below="@id/movie_review"/>
 
     </RelativeLayout>
 

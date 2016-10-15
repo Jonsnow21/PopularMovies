@@ -9,6 +9,8 @@ import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.android.popularmovies.R.string.reviews;
+
 public class ReviewsCallResult implements Parcelable {
 
     @SerializedName("id")
@@ -19,7 +21,7 @@ public class ReviewsCallResult implements Parcelable {
     private Integer page;
     @SerializedName("results")
     @Expose
-    private List<Review> reviews = new ArrayList<Review>();
+    private ArrayList<Review> reviews = new ArrayList<Review>();
     @SerializedName("total_pages")
     @Expose
     private Integer totalPages;
@@ -68,7 +70,7 @@ public class ReviewsCallResult implements Parcelable {
      * @return
      *     The reviews
      */
-    public List<Review> getReviews() {
+    public ArrayList<Review> getReviews() {
         return reviews;
     }
 
@@ -77,7 +79,7 @@ public class ReviewsCallResult implements Parcelable {
      * @param reviews
      *     The reviews
      */
-    public void setReviews(List<Review> reviews) {
+    public void setReviews(ArrayList<Review> reviews) {
         this.reviews = reviews;
     }
 

@@ -18,8 +18,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.popularmovies.R;
+import com.example.android.popularmovies.adapter.MovieAdapter;
+import com.example.android.popularmovies.adapter.ReviewAdapter;
 import com.example.android.popularmovies.adapter.TrailerAdapter;
 import com.example.android.popularmovies.model.Movie;
+import com.example.android.popularmovies.model.Review;
+import com.example.android.popularmovies.model.ReviewsCallResult;
 import com.example.android.popularmovies.model.Trailer;
 import com.example.android.popularmovies.model.TrailersCallResult;
 import com.example.android.popularmovies.rest.ApiClient;
@@ -34,7 +38,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static android.R.attr.id;
 import static android.content.ContentValues.TAG;
+import static android.os.Build.VERSION_CODES.M;
+import static com.example.android.popularmovies.R.id.recyclerView;
 import static com.example.android.popularmovies.R.string.trailers;
 import static com.example.android.popularmovies.utils.Constants.APIID_PARAM;
 import static com.example.android.popularmovies.utils.Constants.API_KEY;
@@ -42,13 +49,14 @@ import static com.example.android.popularmovies.utils.Constants.API_KEY;
 public class DetailActivity extends AppCompatActivity {
 
     private ImageView thumbnail, backdropImage;
-    private TextView movieTitle, releaseDate, movieDescription;
+    private TextView movieTitle, releaseDate, movieDescription, noTrailers, noReviews;
     private RatingBar movieRating;
     private Movie movie;
     private final String LOG_TAG = DetailActivity.class.getSimpleName();
     private NetworkUtils networkUtils;
     private TrailerAdapter trailerAdapter;
-    private RecyclerView recyclerView;
+    private ReviewAdapter reviewAdapter;
+    private RecyclerView recyclerViewForTrailers, recyclerViewForReviews;
     private Context mContext;
 
     @Override
@@ -72,6 +80,8 @@ public class DetailActivity extends AppCompatActivity {
         movieDescription = (TextView) findViewById(R.id.movie_description);
         movieRating = (RatingBar) findViewById(R.id.movie_rating);
         backdropImage = (ImageView) findViewById(R.id.movie_backdrop_image);
+        noTrailers = (TextView) findViewById(R.id.no_trailers);
+        noReviews = (TextView) findViewById(R.id.no_reviews);
 
         movieTitle.setText(movie.getTitle());
         releaseDate.setText(movie.getReleaseDate());
@@ -90,82 +100,93 @@ public class DetailActivity extends AppCompatActivity {
                 .error(R.drawable.placeholder_error)
                 .into(backdropImage);
 
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerView_trailer);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewForTrailers = (RecyclerView) findViewById(R.id.recyclerView_trailer);
+        recyclerViewForTrailers.setLayoutManager(new LinearLayoutManager(this));
+
+        recyclerViewForReviews = (RecyclerView) findViewById(R.id.recyclerView_reviews);
+        recyclerViewForReviews.setLayoutManager(new LinearLayoutManager(this));
 
         int id = movie.getId();
-        getTrailers(id);
+        if (networkUtils.isOnline(this)) {
+            getTrailers(id);
+            getReviews(id);
+        } else {
+            Toast.makeText(this, "Please turn on an active internet connection", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void getTrailers(int id) {
-        if (networkUtils.isOnline(this)) {
-            String trailerString = id + "/videos";
-            Uri builtUri = Uri.parse(trailerString).buildUpon()
-                    .appendQueryParameter(APIID_PARAM, API_KEY)
-                    .build();
-            String url = builtUri.toString();
 
-            ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
-            Call<TrailersCallResult> call = apiService.getVideos(url);
-            Log.v("URL", call.request().url().toString());
-            call.enqueue(new Callback<TrailersCallResult>() {
-                @Override
-                public void onResponse(Call<TrailersCallResult> call, Response<TrailersCallResult> response) {
-                    Log.v("data", response.body().toString());
-                    ArrayList<Trailer> trailers = response.body().getTrailers();
+        String trailerString = id + "/videos";
+        Uri builtUri = Uri.parse(trailerString).buildUpon()
+                .appendQueryParameter(APIID_PARAM, API_KEY)
+                .build();
+        String url = builtUri.toString();
+
+        ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
+        Call<TrailersCallResult> call = apiService.getVideos(url);
+        Log.v("URL", call.request().url().toString());
+        call.enqueue(new Callback<TrailersCallResult>() {
+            @Override
+            public void onResponse(Call<TrailersCallResult> call, Response<TrailersCallResult> response) {
+                Log.v("data", response.body().toString());
+                ArrayList<Trailer> trailers = response.body().getTrailers();
+                if(trailers.size() == 0) {
+                    recyclerViewForTrailers.setVisibility(View.GONE);
+                    noTrailers.setVisibility(View.VISIBLE);
+                } else {
                     trailerAdapter = new TrailerAdapter(
                             mContext,
                             R.layout.list_item_trailer,
                             trailers
                     );
-                    recyclerView.setAdapter(trailerAdapter);
+                    recyclerViewForTrailers.setAdapter(trailerAdapter);
                 }
+            }
 
-                @Override
-                public void onFailure(Call<TrailersCallResult> call, Throwable t) {
-                    Log.e(TAG, t.toString());
-                    Log.v("onFailure", "problem");
-                }
-            });
-        } else {
-            Toast.makeText(this, "Please turn on an active internet connection", Toast.LENGTH_SHORT).show();
-        }
+            @Override
+            public void onFailure(Call<TrailersCallResult> call, Throwable t) {
+                Log.e(TAG, t.toString());
+                Log.v("onFailure", "problem");
+            }
+        });
     }
 
-    /*private void getReviews(int id) {
-        if (networkUtils.isOnline(this)) {
-            String trailerString = id + "/reviews";
-            Uri builtUri = Uri.parse(trailerString).buildUpon()
-                    .appendQueryParameter(APIID_PARAM, API_KEY)
-                    .build();
-            String url = builtUri.toString();
+    private void getReviews(int id) {
 
-            ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
-            Call<TrailersCallResult> call = apiService.getVideos(url);
-            Log.v("URL", call.request().url().toString());
-            call.enqueue(new Callback<TrailersCallResult>() {
-                @Override
-                public void onResponse(Call<TrailersCallResult> call, Response<TrailersCallResult> response) {
-                    Log.v("data", response.body().toString());
-                    List<Trailer> trailers = response.body().getTrailers();
-                    *//*myAdapter = new MovieAdapter(
-                            getActivity(),
-                            R.layout.grid_item,
-                            movies
+        String trailerString = id + "/reviews";
+        Uri builtUri = Uri.parse(trailerString).buildUpon()
+                .appendQueryParameter(APIID_PARAM, API_KEY)
+                .build();
+        String url = builtUri.toString();
+
+        ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
+        Call<ReviewsCallResult> call = apiService.getReviews(url);
+        Log.v("URL", call.request().url().toString());
+        call.enqueue(new Callback<ReviewsCallResult>() {
+            @Override
+            public void onResponse(Call<ReviewsCallResult> call, Response<ReviewsCallResult> response) {
+                Log.v("data", response.body().toString());
+                ArrayList<Review> reviews = response.body().getReviews();
+                if (reviews.size() == 0) {
+                    recyclerViewForReviews.setVisibility(View.GONE);
+                    noReviews.setVisibility(View.VISIBLE);
+                } else {
+                    reviewAdapter = new ReviewAdapter(
+                            mContext,
+                            R.layout.list_item_review,
+                            reviews
                     );
-                    recyclerView.setAdapter(myAdapter);*//*
+                    recyclerViewForReviews.setAdapter(reviewAdapter);
                 }
-
-                @Override
-                public void onFailure(Call<TrailersCallResult> call, Throwable t) {
-                    Log.e(TAG, t.toString());
-                    Log.v("onFailure", "problem");
-                }
-            });
-        } else {
-            Toast.makeText(this, "Please turn on an active internet connection", Toast.LENGTH_SHORT).show();
-        }
-    }*/
+            }
+            @Override
+            public void onFailure(Call<ReviewsCallResult> call, Throwable t) {
+                Log.e(TAG, t.toString());
+                Log.v("onFailure", "problem");
+            }
+        });
+    }
 
     private void initCollapsingToolbar() {
         final CollapsingToolbarLayout collapsingToolbar =
