@@ -27,22 +27,14 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
+        movie = getIntent().getParcelableExtra(Intent.EXTRA_TEXT);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        backdropImage = (ImageView) findViewById(R.id.movie_backdrop_image);
+
+        prepareFragment();
         setSupportActionBar(toolbar);
         initCollapsingToolbar();
-
-        Intent intent = getIntent();
-        movie = intent.getParcelableExtra(Intent.EXTRA_TEXT);
-
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        df = new DetailFragment();
-        Bundle bundle = new Bundle();
-        bundle.putParcelable("Movie", movie);
-        df.setArguments(bundle);
-        fragmentTransaction.add(R.id.movie_detail_container, df).commit();
-
-        backdropImage = (ImageView) findViewById(R.id.movie_backdrop_image);
 
         Picasso.with(this)
                 .load(movie.getBackdropPath())
@@ -82,6 +74,20 @@ public class DetailActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    /**
+     * To prepare detail fragment
+     * */
+    private void prepareFragment() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        df = new DetailFragment();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("Movie", movie);
+        df.setArguments(bundle);
+        fragmentTransaction.add(R.id.movie_detail_container, df).commit();
+
     }
 
 }

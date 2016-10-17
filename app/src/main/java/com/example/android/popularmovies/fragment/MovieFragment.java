@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,6 +24,7 @@ import android.widget.Toast;
 
 import com.example.android.popularmovies.BuildConfig;
 import com.example.android.popularmovies.R;
+import com.example.android.popularmovies.activity.MainActivity;
 import com.example.android.popularmovies.activity.SettingsActivity;
 import com.example.android.popularmovies.adapter.MovieAdapter;
 import com.example.android.popularmovies.model.Movie;
@@ -29,6 +32,7 @@ import com.example.android.popularmovies.model.MoviesCallResult;
 import com.example.android.popularmovies.rest.ApiClient;
 import com.example.android.popularmovies.rest.ApiInterface;
 import com.example.android.popularmovies.utils.NetworkUtils;
+import com.example.android.popularmovies.utils.SharedPrefUtil;
 
 import java.util.ArrayList;
 
@@ -39,6 +43,7 @@ import retrofit2.Response;
 import static android.content.ContentValues.TAG;
 import static com.example.android.popularmovies.utils.Constants.APIID_PARAM;
 import static com.example.android.popularmovies.utils.Constants.API_KEY;
+import static com.example.android.popularmovies.utils.Constants.PAN_KEY;
 
 public class MovieFragment extends Fragment {
 
@@ -47,6 +52,14 @@ public class MovieFragment extends Fragment {
     private String mSortOrder;
     private SharedPreferences preferences;
     private NetworkUtils networkUtils;
+    private ArrayList<Movie> movies;
+
+    public interface DetailFragmentCallback {
+        /**
+         * DetailFragmentCallback for when an item has been selected.
+         */
+        void onItemSelected(Movie movie);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,7 +85,11 @@ public class MovieFragment extends Fragment {
         mSortOrder = preferences.getString(getString(R.string.sort_order), getString(R.string.pref_sort_most_popular));
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ) {
+            recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 4));
+        } else {
+            recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        }
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         getMovies(mSortOrder);
         return rootView;
@@ -113,13 +130,15 @@ public class MovieFragment extends Fragment {
                 @Override
                 public void onResponse(Call<MoviesCallResult> call, Response<MoviesCallResult> response) {
                     Log.v("data", response.body().toString());
-                    ArrayList<Movie> movies = response.body().getMovies();
+                    movies = response.body().getMovies();
+
                     myAdapter = new MovieAdapter(
                             getActivity(),
                             R.layout.grid_item,
                             movies
                     );
                     recyclerView.setAdapter(myAdapter);
+                    getFirstMovie();
                 }
 
                 @Override
@@ -130,6 +149,18 @@ public class MovieFragment extends Fragment {
             });
         } else {
             Toast.makeText(getContext(), "Please turn on an active internet connection", Toast.LENGTH_SHORT).show();
+        }
+    }
+    /*
+    * In case of tablets if the detail fragment is empty it would be automatically set to 1st movie
+    * */
+    public void getFirstMovie(){
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        SharedPrefUtil sharedPrefUtil = new SharedPrefUtil(getActivity());
+        boolean twoPan = sharedPrefUtil.getBooleanPreference(PAN_KEY, false);
+        DetailFragment df = (DetailFragment) fragmentManager.findFragmentByTag(MainActivity.DF_TAG);
+        if(df == null && twoPan) {
+            ((MovieFragment.DetailFragmentCallback) getActivity()).onItemSelected(movies.get(0));
         }
     }
 }
