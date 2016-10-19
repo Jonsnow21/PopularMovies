@@ -1,6 +1,5 @@
 package com.example.android.popularmovies.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
@@ -41,14 +40,6 @@ public class MainActivity extends AppCompatActivity implements MovieFragment.Det
             getSupportActionBar().setElevation(0f);
         }
     }
-
-    /*@Override
-    protected void onResume() {
-        DetailFragment df = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DF_TAG);
-        if (null == df) {
-
-        }
-    }*/
 
     @Override
     public void onItemSelected(Movie movie) {

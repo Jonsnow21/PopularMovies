@@ -54,6 +54,8 @@ public class Movie implements Parcelable {
     @Expose
     private float voteAverage;
 
+    private boolean favourite;
+
     /**
      *
      * @return
@@ -308,6 +310,26 @@ public class Movie implements Parcelable {
         this.voteAverage = voteAverage;
     }
 
+    /**
+     *
+     * @return
+     *     The favourite
+     */
+
+    public boolean isFavourite() {
+        return favourite;
+    }
+
+    /**
+     *
+     * @param
+     *      favourite
+     */
+
+    public void setFavourite(boolean favourite) {
+        this.favourite = favourite;
+    }
+
 
     protected Movie(Parcel in) {
         posterPath = in.readString();
@@ -331,6 +353,7 @@ public class Movie implements Parcelable {
         byte videoVal = in.readByte();
         video = videoVal == 0x02 ? null : videoVal != 0x00;
         voteAverage = in.readFloat();
+        favourite = in.readByte() != 0x00;
     }
 
     @Override
@@ -382,6 +405,7 @@ public class Movie implements Parcelable {
             dest.writeByte((byte) (video ? 0x01 : 0x00));
         }
         dest.writeFloat(voteAverage);
+        dest.writeByte((byte) (favourite ? 0x01 : 0x00));
     }
 
     @SuppressWarnings("unused")

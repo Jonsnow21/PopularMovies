@@ -4,6 +4,9 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -42,20 +45,23 @@ import static com.example.android.popularmovies.utils.Constants.API_KEY;
 
 public class DetailFragment extends Fragment {
 
-    private Movie movie;
+    private Context mContext;
     private ImageView thumbnail;
     private TextView movieTitle, releaseDate, movieDescription, noTrailers, noReviews;
     private RatingBar movieRating;
-    private final String LOG_TAG = DetailFragment.class.getSimpleName();
-    private NetworkUtils networkUtils;
+    private FloatingActionButton favouriteButton;
+    private CoordinatorLayout detailContentCoordinatorLayout;
+    private RecyclerView recyclerViewForTrailers, recyclerViewForReviews;
     private TrailerAdapter trailerAdapter;
     private ReviewAdapter reviewAdapter;
-    private RecyclerView recyclerViewForTrailers, recyclerViewForReviews;
-    private Context mContext;
+    private Movie movie;
+    private NetworkUtils networkUtils;
+    private final String LOG_TAG = DetailFragment.class.getSimpleName();
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.detail_content, container, false);
         Bundle bundle = getArguments();
         if(bundle != null) {
@@ -74,6 +80,9 @@ public class DetailFragment extends Fragment {
         movieRating = (RatingBar) rootView.findViewById(R.id.movie_rating);
         noTrailers = (TextView) rootView.findViewById(R.id.no_trailers);
         noReviews = (TextView) rootView.findViewById(R.id.no_reviews);
+        favouriteButton = (FloatingActionButton) rootView.findViewById(R.id.fab);
+        detailContentCoordinatorLayout = (CoordinatorLayout) rootView
+                .findViewById(R.id.detail_content_coordinator_layout);
 
         movieTitle.setText(movie.getTitle());
         releaseDate.setText(movie.getReleaseDate());
@@ -92,15 +101,40 @@ public class DetailFragment extends Fragment {
         recyclerViewForReviews = (RecyclerView) rootView.findViewById(R.id.recyclerView_reviews);
         recyclerViewForReviews.setLayoutManager(new LinearLayoutManager(mContext));
 
+        favouriteButton.setOnClickListener(makeFavourite);
+        int resId = movie.isFavourite() ? R.drawable.ic_star_white_36dp : R.drawable.ic_star_border_white_36dp;
+        favouriteButton.setImageResource(resId);
+
         int id = movie.getId();
         if (networkUtils.isOnline(getActivity())) {
             getTrailers(id);
             getReviews(id);
         } else {
-            Toast.makeText(mContext, "Please turn on an active internet connection", Toast.LENGTH_SHORT).show();
+            Snackbar.make(detailContentCoordinatorLayout, "Please turn on an active internet connection",
+                    Snackbar.LENGTH_SHORT).show();
         }
 
         return rootView;
+    }
+
+    View.OnClickListener makeFavourite = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            //Todo : Add movie to favourite database
+            setDrawable();
+        }
+    };
+
+    private void setDrawable() {
+        if (movie.isFavourite()) {
+            movie.setFavourite(false);
+            favouriteButton.setImageResource(R.drawable.ic_star_border_white_36dp);
+            Snackbar.make(detailContentCoordinatorLayout, "Movie removed from favourite", Snackbar.LENGTH_SHORT).show();
+        } else {
+            movie.setFavourite(true);
+            favouriteButton.setImageResource(R.drawable.ic_star_white_36dp);
+            Snackbar.make(detailContentCoordinatorLayout, "Movie added to favourite", Snackbar.LENGTH_SHORT).show();
+        }
     }
 
     private void getTrailers(int id) {
