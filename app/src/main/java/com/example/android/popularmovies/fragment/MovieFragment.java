@@ -125,11 +125,9 @@ public class MovieFragment extends Fragment {
 
             ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
             Call<MoviesCallResult> call = apiService.getMovies(url);
-            Log.v("URL", call.request().url().toString());
             call.enqueue(new Callback<MoviesCallResult>() {
                 @Override
                 public void onResponse(Call<MoviesCallResult> call, Response<MoviesCallResult> response) {
-                    Log.v("data", response.body().toString());
                     movies = response.body().getMovies();
 
                     myAdapter = new MovieAdapter(
@@ -144,11 +142,10 @@ public class MovieFragment extends Fragment {
                 @Override
                 public void onFailure(Call<MoviesCallResult> call, Throwable t) {
                     Log.e(TAG, t.toString());
-                    Log.v("onFailure", "problem");
                 }
             });
         } else {
-            Toast.makeText(getContext(), "Please turn on an active internet connection", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.no_internet_message, Toast.LENGTH_SHORT).show();
         }
     }
     /*

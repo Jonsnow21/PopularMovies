@@ -34,7 +34,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         this.movieList = movieList;
         this.context = mContext;
         this.layout = layout;
-//        Log.v("MovieList", movieList.size() + "");
     }
 
     public static class MovieViewHolder extends RecyclerView.ViewHolder {

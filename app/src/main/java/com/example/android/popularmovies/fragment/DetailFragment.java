@@ -110,8 +110,7 @@ public class DetailFragment extends Fragment {
             getTrailers(id);
             getReviews(id);
         } else {
-            Snackbar.make(detailContentCoordinatorLayout, "Please turn on an active internet connection",
-                    Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(detailContentCoordinatorLayout, R.string.no_internet_message, Snackbar.LENGTH_SHORT).show();
         }
 
         return rootView;
@@ -129,11 +128,11 @@ public class DetailFragment extends Fragment {
         if (movie.isFavourite()) {
             movie.setFavourite(false);
             favouriteButton.setImageResource(R.drawable.ic_star_border_white_36dp);
-            Snackbar.make(detailContentCoordinatorLayout, "Movie removed from favourite", Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(detailContentCoordinatorLayout, R.string.removed_from_favourite, Snackbar.LENGTH_SHORT).show();
         } else {
             movie.setFavourite(true);
             favouriteButton.setImageResource(R.drawable.ic_star_white_36dp);
-            Snackbar.make(detailContentCoordinatorLayout, "Movie added to favourite", Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(detailContentCoordinatorLayout, R.string.added_to_favourite, Snackbar.LENGTH_SHORT).show();
         }
     }
 

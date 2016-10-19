@@ -51,7 +51,7 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.TrailerV
 
         holder.imageView.setImageResource(R.drawable.ic_ondemand_video_black_24dp);
         int x = position + 1;
-        holder.textView.setText("Trailer " + x);
+        holder.textView.setText("Play Trailer " + x);
         holder.view.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View v) {
