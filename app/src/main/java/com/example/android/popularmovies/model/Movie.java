@@ -54,7 +54,7 @@ public class Movie implements Parcelable {
     @Expose
     private float voteAverage;
 
-    private boolean favourite;
+    public Movie(){}
 
     /**
      *
@@ -62,8 +62,7 @@ public class Movie implements Parcelable {
      *     The posterPath
      */
     public String getPosterPath() {
-        final String BASE_URL = "http://image.tmdb.org/t/p/w342/";
-        return BASE_URL + posterPath;
+        return posterPath;
     }
 
     /**
@@ -225,8 +224,7 @@ public class Movie implements Parcelable {
      *     The backdropPath
      */
     public String getBackdropPath() {
-        final String BASE_URL = "http://image.tmdb.org/t/p/w500/";
-        return BASE_URL + backdropPath;
+        return backdropPath;
     }
 
     /**
@@ -316,21 +314,6 @@ public class Movie implements Parcelable {
      *     The favourite
      */
 
-    public boolean isFavourite() {
-        return favourite;
-    }
-
-    /**
-     *
-     * @param
-     *      favourite
-     */
-
-    public void setFavourite(boolean favourite) {
-        this.favourite = favourite;
-    }
-
-
     protected Movie(Parcel in) {
         posterPath = in.readString();
         byte adultVal = in.readByte();
@@ -353,7 +336,6 @@ public class Movie implements Parcelable {
         byte videoVal = in.readByte();
         video = videoVal == 0x02 ? null : videoVal != 0x00;
         voteAverage = in.readFloat();
-        favourite = in.readByte() != 0x00;
     }
 
     @Override
@@ -405,7 +387,6 @@ public class Movie implements Parcelable {
             dest.writeByte((byte) (video ? 0x01 : 0x00));
         }
         dest.writeFloat(voteAverage);
-        dest.writeByte((byte) (favourite ? 0x01 : 0x00));
     }
 
     @SuppressWarnings("unused")

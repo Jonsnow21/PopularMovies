@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
 
 import com.example.android.popularmovies.R;
 import com.example.android.popularmovies.fragment.DetailFragment;
@@ -19,6 +20,7 @@ public class MainActivity extends AppCompatActivity implements MovieFragment.Det
     public final static String DF_TAG = "detail_fragment";
     private boolean mTwoPane = false;
     private SharedPrefUtil sharedPrefUtil;
+    int count = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +57,16 @@ public class MainActivity extends AppCompatActivity implements MovieFragment.Det
         } else {
             Intent intent = new Intent(this, DetailActivity.class).putExtra(Intent.EXTRA_TEXT, movie);
             startActivity(intent);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (count == 2) {
+            count--;
+            Toast.makeText(this, R.string.press_back_again_to_exit, Toast.LENGTH_SHORT).show();
+        } else {
+            super.onBackPressed();
         }
     }
 }

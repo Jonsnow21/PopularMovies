@@ -17,6 +17,7 @@ import com.example.android.popularmovies.activity.DetailActivity;
 import com.example.android.popularmovies.fragment.DetailFragment;
 import com.example.android.popularmovies.fragment.MovieFragment;
 import com.example.android.popularmovies.model.Movie;
+import com.example.android.popularmovies.utils.Constants;
 import com.example.android.popularmovies.utils.SharedPrefUtil;
 import com.squareup.picasso.Picasso;
 
@@ -57,7 +58,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     public void onBindViewHolder(MovieViewHolder holder, final int position) {
 
         Picasso.with(context)
-                .load(movieList.get(position).getPosterPath())
+                .load(Constants.POSTER_BASE_URL + movieList.get(position).getPosterPath())
                 .placeholder(R.drawable.placeholder)
                 .error(R.drawable.placeholder_error)
                 .into(holder.imageView);

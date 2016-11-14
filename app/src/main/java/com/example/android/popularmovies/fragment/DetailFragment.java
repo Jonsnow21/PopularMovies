@@ -1,8 +1,14 @@
 package com.example.android.popularmovies.fragment;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -17,20 +23,23 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.android.popularmovies.R;
-import com.example.android.popularmovies.activity.DetailActivity;
 import com.example.android.popularmovies.adapter.ReviewAdapter;
 import com.example.android.popularmovies.adapter.TrailerAdapter;
+import com.example.android.popularmovies.database.MovieContract.MovieEntry;
+import com.example.android.popularmovies.database.MovieDbHelper;
 import com.example.android.popularmovies.model.Movie;
 import com.example.android.popularmovies.model.Review;
 import com.example.android.popularmovies.model.ReviewsCallResult;
 import com.example.android.popularmovies.model.Trailer;
 import com.example.android.popularmovies.model.TrailersCallResult;
+import com.example.android.popularmovies.orm.MovieORM;
 import com.example.android.popularmovies.rest.ApiClient;
 import com.example.android.popularmovies.rest.ApiInterface;
+import com.example.android.popularmovies.utils.Constants;
 import com.example.android.popularmovies.utils.NetworkUtils;
+import com.example.android.popularmovies.utils.SharedPrefUtil;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -56,6 +65,11 @@ public class DetailFragment extends Fragment {
     private ReviewAdapter reviewAdapter;
     private Movie movie;
     private NetworkUtils networkUtils;
+    private String mSortOrder;
+    private SharedPreferences preferences;
+    private SQLiteOpenHelper movieDbHelper;
+    private Boolean isFavourite;
+    private int id;
     private final String LOG_TAG = DetailFragment.class.getSimpleName();
 
     @Nullable
@@ -66,12 +80,15 @@ public class DetailFragment extends Fragment {
         Bundle bundle = getArguments();
         if(bundle != null) {
             movie = bundle.getParcelable("Movie");
+            id = movie.getId();
         } else {
             Log.v(LOG_TAG, "null Movie");
         }
 
-        networkUtils = new NetworkUtils();
         mContext = getContext();
+        networkUtils = new NetworkUtils();
+        preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        mSortOrder = preferences.getString(getString(R.string.sort_order), getString(R.string.pref_sort_most_popular));
 
         movieTitle = (TextView) rootView.findViewById(R.id.movie_title);
         thumbnail = (ImageView) rootView.findViewById(R.id.movie_thumbnail);
@@ -90,7 +107,7 @@ public class DetailFragment extends Fragment {
         movieRating.setRating(movie.getVoteAverage());
 
         Picasso.with(mContext)
-                .load( movie.getPosterPath())
+                .load(Constants.POSTER_BASE_URL + movie.getPosterPath())
                 .placeholder(R.drawable.placeholder)
                 .error(R.drawable.placeholder_error)
                 .into(thumbnail);
@@ -101,39 +118,69 @@ public class DetailFragment extends Fragment {
         recyclerViewForReviews = (RecyclerView) rootView.findViewById(R.id.recyclerView_reviews);
         recyclerViewForReviews.setLayoutManager(new LinearLayoutManager(mContext));
 
-        favouriteButton.setOnClickListener(makeFavourite);
-        int resId = movie.isFavourite() ? R.drawable.ic_star_white_36dp : R.drawable.ic_star_border_white_36dp;
-        favouriteButton.setImageResource(resId);
+        if (mSortOrder.equals(mContext.getString(R.string.pref_sort_favourite))) {
+            favouriteButton.setVisibility(View.GONE);
+        } else {
+            movieDbHelper = new MovieDbHelper(mContext);
+            isFavourite = checkIfFavourite(movie);
+            setDrawable();
+            favouriteButton.setOnClickListener(makeFavourite);
+        }
 
-        int id = movie.getId();
         if (networkUtils.isOnline(getActivity())) {
             getTrailers(id);
             getReviews(id);
         } else {
-            Snackbar.make(detailContentCoordinatorLayout, R.string.no_internet_message, Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(detailContentCoordinatorLayout, R.string.no_internet_message, Snackbar.LENGTH_LONG).show();
         }
 
         return rootView;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
     View.OnClickListener makeFavourite = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            //Todo : Add movie to favourite database
+            SQLiteDatabase wdb = movieDbHelper.getWritableDatabase();
+            if (isFavourite) {
+                /*String query = "DELETE FROM " + MovieEntry.TABLE_NAME + " WHERE " +
+                        MovieEntry.COLUMN_MOVIE_ID + " = " + id;
+                wdb.rawQuery(query, null);*/
+                wdb.delete(MovieEntry.TABLE_NAME, MovieEntry.COLUMN_MOVIE_ID + " = ?", new String[] {String.valueOf(movie.getId())});
+                Snackbar.make(detailContentCoordinatorLayout, R.string.removed_from_favourite, Snackbar.LENGTH_SHORT).show();
+                isFavourite = false;
+            } else {
+                wdb.insert(MovieEntry.TABLE_NAME, null, MovieORM.getMovieValue(movie));
+                Snackbar.make(detailContentCoordinatorLayout, R.string.added_to_favourite, Snackbar.LENGTH_SHORT).show();
+                isFavourite = true;
+            }
             setDrawable();
+            wdb.close();
+
         }
     };
 
-    private void setDrawable() {
-        if (movie.isFavourite()) {
-            movie.setFavourite(false);
-            favouriteButton.setImageResource(R.drawable.ic_star_border_white_36dp);
-            Snackbar.make(detailContentCoordinatorLayout, R.string.removed_from_favourite, Snackbar.LENGTH_SHORT).show();
-        } else {
-            movie.setFavourite(true);
-            favouriteButton.setImageResource(R.drawable.ic_star_white_36dp);
-            Snackbar.make(detailContentCoordinatorLayout, R.string.added_to_favourite, Snackbar.LENGTH_SHORT).show();
+    public Boolean checkIfFavourite (Movie movie){
+        SQLiteDatabase rdb = movieDbHelper.getReadableDatabase();
+        final String query = "SELECT * FROM " + MovieEntry.TABLE_NAME + " WHERE " +
+                MovieEntry.COLUMN_MOVIE_ID + " = " + movie.getId();
+        Cursor cursor = rdb.rawQuery(query, null);
+        if(cursor.getCount() <= 0){
+            cursor.close();
+            return false;
         }
+        cursor.close();
+        rdb.close();
+        return true;
+    }
+
+    private void setDrawable() {
+        int resId = isFavourite ? R.drawable.ic_star_white_36dp : R.drawable.ic_star_border_white_36dp;
+        favouriteButton.setImageResource(resId);
     }
 
     private void getTrailers(int id) {

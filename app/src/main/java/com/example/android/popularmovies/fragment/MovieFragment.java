@@ -29,6 +29,7 @@ import com.example.android.popularmovies.activity.SettingsActivity;
 import com.example.android.popularmovies.adapter.MovieAdapter;
 import com.example.android.popularmovies.model.Movie;
 import com.example.android.popularmovies.model.MoviesCallResult;
+import com.example.android.popularmovies.orm.MovieORM;
 import com.example.android.popularmovies.rest.ApiClient;
 import com.example.android.popularmovies.rest.ApiInterface;
 import com.example.android.popularmovies.utils.NetworkUtils;
@@ -85,11 +86,14 @@ public class MovieFragment extends Fragment {
         mSortOrder = preferences.getString(getString(R.string.sort_order), getString(R.string.pref_sort_most_popular));
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
+        int num = 0;
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ) {
-            recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 4));
+            num = 4;
         } else {
-            recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+            num = 2;
         }
+
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), num));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         getMovies(mSortOrder);
         return rootView;
@@ -117,7 +121,7 @@ public class MovieFragment extends Fragment {
     }
 
     public void getMovies(String sortOrder) {
-        if (networkUtils.isOnline(getActivity())) {
+        if (networkUtils.isOnline(getActivity()) && !sortOrder.equals(getString(R.string.pref_sort_favourite))) {
             Uri builtUri = Uri.parse(sortOrder).buildUpon()
                     .appendQueryParameter(APIID_PARAM, API_KEY)
                     .build();
@@ -145,7 +149,20 @@ public class MovieFragment extends Fragment {
                 }
             });
         } else {
-            Toast.makeText(getContext(), R.string.no_internet_message, Toast.LENGTH_SHORT).show();
+
+            if (!networkUtils.isOnline(getActivity())) {
+                Toast.makeText(getContext(), R.string.no_internet_message, Toast.LENGTH_LONG).show();
+            }
+            movies = MovieORM.getAllMovies(getContext());
+
+            myAdapter = new MovieAdapter(
+                    getContext(),
+                    R.layout.grid_item,
+                    movies
+            );
+            myAdapter.notifyDataSetChanged();
+            recyclerView.setAdapter(myAdapter);
+            getFirstMovie();
         }
     }
     /*

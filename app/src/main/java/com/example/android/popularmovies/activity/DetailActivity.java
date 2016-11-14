@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import com.example.android.popularmovies.R;
 import com.example.android.popularmovies.fragment.DetailFragment;
 import com.example.android.popularmovies.model.Movie;
+import com.example.android.popularmovies.utils.Constants;
 import com.squareup.picasso.Picasso;
 
 public class DetailActivity extends AppCompatActivity {
@@ -37,7 +38,7 @@ public class DetailActivity extends AppCompatActivity {
         initCollapsingToolbar();
 
         Picasso.with(this)
-                .load(movie.getBackdropPath())
+                .load(Constants.BACKDROP_BASE_URL + movie.getBackdropPath())
                 .placeholder(R.drawable.placeholder)
                 .error(R.drawable.placeholder_error)
                 .into(backdropImage);
